@@ -20,12 +20,18 @@ fn parse_line(line : &String, map : &mut HashMap<char, i32>) {
     }
 }
 
-fn number_of_questions(map : & HashMap<char, i32>) -> usize {
-    map.keys().len()
+fn number_of_questions(map : & HashMap<char, i32>, pcount : i32) -> usize {
+    let mut q = 0;
+    for (_k, _v) in map.iter()
+        .filter(|(_k, v)| *v == &pcount) {
+        q += 1;
+    }
+    q
 }
 
 fn main() {
     let mut qcount = 0;
+    let mut pcount = 0;
     let mut map = HashMap::new();
 
     let stdin = io::stdin();
@@ -33,15 +39,17 @@ fn main() {
         let input = line.unwrap();
 
         if input.chars().count() == 0 {
-            let num = number_of_questions(&map);
+            let num = number_of_questions(&map, pcount);
             qcount += num;
+            pcount = 0;
             map = HashMap::new();
             println!("{} +", num)
         } else {
+            pcount += 1;
             parse_line(&input, &mut map);
         }
     }
 
-    let num = number_of_questions(&map);
+    let num = number_of_questions(&map, pcount);
     println!("{}", qcount + num)
 }
