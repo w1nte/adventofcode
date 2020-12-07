@@ -14,5 +14,13 @@ def shiny_gold(bag):
             return True
     return False
 
+def how_many_bags(bag, bcount):
+    if bag not in bagmap.keys() or len(bagmap[bag]) == 0:
+        return 0
+    for b in bagmap[bag]:
+        bcount += int(b[1]) * (how_many_bags(b[0], 0) + 1)
+    return bcount
+
 c = list(filter(lambda x: shiny_gold(x), bagmap.keys()))
 print(len(c))
+print(how_many_bags('shiny gold', 0))
