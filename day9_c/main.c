@@ -4,6 +4,7 @@
 #include <string.h>
 
 #define PREAMBLE 25
+#define NUM_SET_LENGTH 35
 
 uint8_t isSum(int* ringbuffer, int cpos, int num) {
 
@@ -22,28 +23,58 @@ uint8_t isSum(int* ringbuffer, int cpos, int num) {
 
 int main(int argc, char* argv[]) {
     int ringbuffer[PREAMBLE];
+    int numbufferSize = 10;
+    int* numbuffer = malloc(sizeof(int) * numbufferSize);
 
     FILE* fp;
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
 
-    int i = 0;
+    int invalidNumber = 0;
+    int cpos = 0;
     while ((read = getline(&line, &len, stdin)) != -1) {
+        if (cpos >= numbufferSize) {
+            numbufferSize *= 2;
+            numbuffer = realloc(numbuffer, sizeof(int) * numbufferSize);
+        }
+
         int num = atoi(line);
-        if (i >= PREAMBLE) {
-            if (isSum(ringbuffer, i, num) == 0) {
+        if (cpos >= PREAMBLE && invalidNumber == 0) {
+            if (isSum(ringbuffer, cpos, num) == 0) {
                 printf("%d does not follow the rule!\n", num);
-                break;
+                invalidNumber = num;
             }
         }
        
-       ringbuffer[i++ % PREAMBLE] = num;
+       numbuffer[cpos] = num;
+       ringbuffer[cpos++ % PREAMBLE] = num;
+    }
+
+    for (int i = 0; i < cpos - NUM_SET_LENGTH; i++) {
+        int num = 0;
+        int smallestNum = INT32_MAX;
+        int largestNum = 0;
+        for (int j = 0; j < NUM_SET_LENGTH; j++) {
+            if (numbuffer[i + j] < smallestNum)
+                smallestNum = numbuffer[i + j];
+            if (numbuffer[i + j] > largestNum)
+                largestNum = numbuffer[i + j];
+            num += numbuffer[i + j];
+            if (num > invalidNumber) break;
+            else if (num == invalidNumber) {
+                printf("from %d through %d produces the invalid number: %d\n", numbuffer[i], numbuffer[i + j], smallestNum + largestNum);
+            }
+        }
     }
 
     fclose(stdin);
     if (line) {
         free(line);
+    }
+
+    if (numbuffer) {
+        free(numbuffer);
     }
     
     return EXIT_SUCCESS; 
