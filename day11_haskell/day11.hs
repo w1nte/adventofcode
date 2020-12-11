@@ -42,7 +42,7 @@ nextGridUntilSame g1 = if compareGrids g1 g2 then g2 else nextGridUntilSame g2 w
 nextCellState :: Grid -> Cell -> Cell
 nextCellState g ((x, y), s)
     | s == Empty && o == 0 = ((x, y), Occupied)
-    | s == Occupied && o >= 4 = ((x, y), Empty)
+    | s == Occupied && o >= 5 = ((x, y), Empty)
     | otherwise = ((x, y), s) where
         o = getOccupiedNeighboursNumber g (x, y)
 
@@ -58,7 +58,12 @@ isCellOccupied c = case c of
     Just x -> snd x == Occupied
 
 getOccupiedNeighboursNumber :: Grid -> Point -> Int
-getOccupiedNeighboursNumber g p = length (filter (\i -> i) (map (\a -> isCellOccupied (getCell g (fst a + fst p, snd a + snd p))) adjacents))
+getOccupiedNeighboursNumber g p = length (filter id (map (getOccupiedInDirection g p) adjacents))
+
+getOccupiedInDirection :: Grid -> Point -> Point -> Bool
+getOccupiedInDirection g p (x, y) = case getCell g (fst p + x, snd p + y) of
+    Nothing -> False
+    Just c -> snd c == Occupied || (not (snd c == Empty) && getOccupiedInDirection g (fst p + x, snd p + y) (x, y))
 
 main :: IO ()
 main = do
