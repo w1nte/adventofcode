@@ -1,24 +1,32 @@
 import qualified Data.Text as T
 
+type Bus = Int
+type Time = Int
+
 parseIDs :: String -> [Int]
-parseIDs s = map (read . T.unpack) (filter (/= T.pack "x") (T.splitOn (T.pack ",") (T.pack s)))
+parseIDs s = map (read . T.unpack . (\x -> if x == T.pack "x" then T.pack "1" else x)) (T.splitOn (T.pack ",") (T.pack s))
 
-isBus :: Int -> Int -> Bool
-isBus time bus = mod time bus == 0
+isBus :: Bus -> Time -> Bool
+isBus bus time = mod time bus == 0
 
-earliestBus :: Int -> Int -> Int -> (Int, Int)
-earliestBus time count bus = if isBus ntime bus then (bus, count) else earliestBus time (count+1) bus where
-    ntime = time+count
+findFirst :: Bus -> Bus -> Time -> Int -> Int -> Int -> Int
+findFirst b1 b2 time step r1 r2 = if isBus b1 (time + r1) && isBus b2 (time + r2) then time else findFirst b1 b2 (time + step) step r1 r2
 
-ealierBus :: (Int, Int) -> (Int, Int) -> (Int, Int)
-ealierBus b1 b2 = if snd b1 < snd b2 then b1 else b2
+stepSize :: Bus -> Bus -> Int
+stepSize = lcm
+
+findSolution :: [Bus] -> Time -> Int -> Int -> Int
+findSolution [_] time _ _ = time
+findSolution (b1:bs) time step r = findSolution bs nextTime nextStep (r+1) where
+    b2 = head bs
+    nextStep = stepSize step b2
+    nextTime = findFirst b1 b2 time step r (r+1)
 
 main :: IO ()
-main = do
+main = do  
     raw <- readFile "./input.txt"
     let input = lines raw
-    let start = read (head input) :: Int
     let ids = parseIDs (input !! 1)
 
-    let b = foldr1 ealierBus (map (earliestBus start 0) ids)
-    print (fst b * snd b)
+    print ids
+    print (findSolution ids 0 (head ids) 0)
