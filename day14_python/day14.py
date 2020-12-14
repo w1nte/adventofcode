@@ -7,9 +7,20 @@ def apply_mask(mask, value):
     for i in range(len(mask)):
         if mask[i] == '1':
             result[i] = '1'
-        elif mask[i] == '0':
-            result[i] = '0'
+        elif mask[i] == 'X':
+            result[i] = 'X'
     return "".join(result)
+
+
+def generate_addrs(floatingaddr):
+    l = list(floatingaddr)
+    for i in range(len(l)):
+        if l[i] == 'X':
+            t1 = generate_addrs(['0'] + l[i + 1:])
+            t2 = generate_addrs(['1'] + l[i + 1:])
+
+            return list(map(lambda t: l[:i] + t, t1 + t2))
+    return [l]
 
 
 mem = {}
@@ -20,8 +31,9 @@ for line in sys.stdin:
         mask = line[7:]
     else:
         pos, value = re.findall(r'mem\[(\d+)\] = (\d+)', line)[0]
-        mem[pos] = int(apply_mask(mask, value), 2)
-
+        addrs = list(map(lambda a : "".join(a), generate_addrs(apply_mask(mask, pos))))
+        for addr in addrs:
+            mem[int(addr, 2)] = int(value)
 
 print(sum(mem.values()))
 
