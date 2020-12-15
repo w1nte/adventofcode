@@ -19,5 +19,5 @@ def play(numbers, turns):
         nums[nsp] = t
     return n
 
-print(play(input, 2020))
+print(play(input, 30000000))
 
