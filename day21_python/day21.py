@@ -1,5 +1,6 @@
 import sys
 import re
+import collections
 
 
 if __name__ == '__main__':
@@ -24,3 +25,7 @@ if __name__ == '__main__':
                 allergens_food[allergen] = integredients_intersect[0]
 
     print(len([item for item in ingredients_all if item not in allergens_food.values()]))
+
+    # part 2
+    allergens_food = collections.OrderedDict(sorted(allergens_food.items())).values()
+    print(','.join(allergens_food))
