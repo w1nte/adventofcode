@@ -1,14 +1,15 @@
 import sys
 
-h, d = (0, 0)
+h, d, a = (0, 0, 0)
 for c in sys.stdin.readlines():
     c, v, *_ = c.split(' ')
     v = int(v)
     match c:
         case 'forward':
             h += v
+            d -= a * v
         case 'down':
-            d += v
+            a -= v
         case 'up':
-            d -= v
+            a += v
 print(h*d)
